@@ -1,7 +1,7 @@
 import requests
 from typing import Dict, List
-import pandas as pd
 from os import remove
+import json
 
 
 def get_mac_file() -> str:
@@ -12,15 +12,13 @@ def get_mac_file() -> str:
 
 def create_cache_file():
     macs = parse(get_mac_file())
-    df = pd.DataFrame(macs)
-    df.to_csv("data/macs_cache.csv")
-    
-    a = df["mac"] == "28-BD-89"
-    print(a)
+    with open("data/macs_cache.csv", "w") as file:
+        json.dump(macs, file)
 
 
-def open_cached_file() -> pd.DataFrame:
-    return pd.read_csv("data/macs_cache.csv")
+def open_cached_file():
+    with open("data/macs_cache.csv") as file:
+        return json.load(file)
 
 
 def remove_cache_file(force=False):
@@ -47,16 +45,12 @@ def parse(companies) -> Dict[str, List[str]]:
     # Each company is a set of 5 lines seperated by a blank line. Split each company into their own list
     companies_list = cleaned_data.split("\r\n\r\n")
 
-    to_return = {"mac": [], "name": []}
+    to_return = {}
 
     # We only care about the first line since it contains the data we need
     for company in companies_list:
         company_lines = company.split("\n")
-        mac_name = company_lines[0].split("   (hex)		")
-
-        to_return["mac"].append(mac_name[0])
-        to_return["name"].append(mac_name[1].replace("\r", ""))
+        mac, name = company_lines[0].split("   (hex)		")
+        to_return[mac] = name.rstrip("\r")
 
     return to_return
-
-create_cache_file()

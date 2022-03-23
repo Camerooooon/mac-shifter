@@ -13,10 +13,7 @@ def test_get_mac_file():
 
 def test_parse_mac_file():
     companies = parser.parse(MAC_FILE)
-
-    name_indexs = [i for i, v in enumerate(companies["name"]) if v == "Google, Inc."]
-    mac_index = companies["mac"].index("28-BD-89")
-    assert mac_index in name_indexs
+    assert companies["28-BD-89"] == "Google, Inc."
 
 
 def test_create_cache_file():
@@ -25,9 +22,8 @@ def test_create_cache_file():
 
 
 def test_open_cached_file():
-    df = parser.open_cached_file()
-    val = df["name"].where(df["mac"] == "28-BD-89")
-    assert list(val) == 0
+    macs = parser.open_cached_file()
+    assert macs["28-BD-89"] == "Google, Inc."
 
 
 def test_remove_cache_file():
