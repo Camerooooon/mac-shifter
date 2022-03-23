@@ -12,18 +12,26 @@ class BaseMac:
     template = "##:##:##:##:##:##"
     chars = "ABCDEFG12345"
 
+    def __init__(self, dashes=False):
+        self.dashes = dashes
+
     @property
     def mac(self) -> str:
         return self.fill()
 
     def fill(self) -> str:
-        new = list(self.template)
+        template_list = list(self.template)
 
-        for i, x in enumerate(self.template):
-            if x == "#":
-                new[i] = choice(self.chars)
+        for i, character in enumerate(self.template):
+            if character == "#":
+                template_list[i] = choice(self.chars)
 
-        return "".join(new)
+        filled_mac = "".join(template_list)
+
+        if self.dashes:
+            filled_mac = filled_mac.replace(":", "-")
+
+        return filled_mac
 
 
 class TestMac(BaseMac):
@@ -37,3 +45,11 @@ class TestMac(BaseMac):
     """
 
     template = "AB:CD:##:##:##:12"
+
+
+class Google(BaseMac):
+    template = "D8:EB:46:##:##:##"
+
+
+class Apple(BaseMac):
+    template = "60:8B:0E:##:##:##"
