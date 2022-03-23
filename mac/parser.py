@@ -1,29 +1,45 @@
 import requests
+from typing import Dict, List
+import pandas as pd
+from os import remove
 
 
-def get_mac_file():
+def get_mac_file() -> str:
     mac_file = "https://standards-oui.ieee.org/oui/oui.txt"
     res = requests.get(mac_file)
     return res.text
 
 
-def cache_file():
-    pass
+def create_cache_file():
+    macs = parse(get_mac_file())
+    df = pd.DataFrame(macs)
+    df.to_csv("data/macs_cache.csv")
+    
+    a = df["mac"] == "28-BD-89"
+    print(a)
 
 
-def open_cached_file():
-    pass
+def open_cached_file() -> pd.DataFrame:
+    return pd.read_csv("data/macs_cache.csv")
 
 
-def parser():
-    pass
+def remove_cache_file(force=False):
+    path = "data/macs_cache.csv"
+
+    if force:
+        remove(path)
+    else:
+        res = input(f"Are you sure you wan't to remove {path}? [y/N]: ")
+        low = res.lower()
+        if low == "y" or low == "yes":
+            remove(path)
 
 
-def parse(companies):
+def parse(companies) -> Dict[str, List[str]]:
     lines = companies.split("\n")
 
     # Remove the first 4 lines because they contain junk information
-    for i in range(4):
+    for _ in range(4):
         lines.pop(0)
 
     cleaned_data = "\n".join(lines)
@@ -31,12 +47,16 @@ def parse(companies):
     # Each company is a set of 5 lines seperated by a blank line. Split each company into their own list
     companies_list = cleaned_data.split("\r\n\r\n")
 
-    to_return = {}
+    to_return = {"mac": [], "name": []}
 
     # We only care about the first line since it contains the data we need
     for company in companies_list:
         company_lines = company.split("\n")
         mac_name = company_lines[0].split("   (hex)		")
-        to_return[mac_name[0]] = mac_name[1].replace("\r", "")
+
+        to_return["mac"].append(mac_name[0])
+        to_return["name"].append(mac_name[1].replace("\r", ""))
 
     return to_return
+
+create_cache_file()
