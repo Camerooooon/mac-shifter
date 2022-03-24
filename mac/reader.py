@@ -1,5 +1,5 @@
-"""Functions related to getting information based on mac address"""
+from mac import parser
 
 
 def get_name_of_mac(mac: str) -> str:
-    pass
+    return parser.open_cached_file()[mac]
